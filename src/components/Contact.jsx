@@ -3,7 +3,7 @@ import { ArrowUpRight, Copy, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import RegMark from "./RegMark";
 
-const CONTACT_EMAIL = "your-email@example.com";
+const CONTACT_EMAIL = "nandishvarsani@gmail.com";
 
 function MagneticButton() {
   const ref = useRef(null);
