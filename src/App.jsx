@@ -10,10 +10,11 @@ import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import IntroLoader from "./components/IntroLoader";
 import CustomCursor from "./components/CustomCursor";
-import { projectImageUrls } from "./data/projects";
+import { projects } from "./data/projects";
 
-const MINIMUM_LOADER_TIME = 2700;
-const MAXIMUM_LOADER_TIME = 8500;
+const MINIMUM_LOADER_TIME = 850;
+const MAXIMUM_LOADER_TIME = 2600;
+const heroImages = [projects[8]?.image, projects[7]?.image, projects[3]?.image].filter(Boolean);
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -26,54 +27,50 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     const startedAt = performance.now();
-    const total = projectImageUrls.length;
+    const tasks = [...heroImages, "fonts"];
     let completed = 0;
 
-    const updateProgress = () => {
+    const advance = () => {
       completed += 1;
-      if (!cancelled) setProgress(Math.round((completed / total) * 100));
+      if (!cancelled) setProgress(Math.min(100, Math.round((completed / tasks.length) * 100)));
     };
 
-    const preload = projectImageUrls.map(
+    const imageTasks = heroImages.map(
       (src) =>
         new Promise((resolve) => {
           const image = new Image();
-          let settled = false;
-          const finish = () => {
-            if (settled) return;
-            settled = true;
-            updateProgress();
+          const done = () => {
+            advance();
             resolve();
           };
-          image.onload = finish;
-          image.onerror = finish;
+          image.onload = done;
+          image.onerror = done;
           image.src = src;
-          if (image.complete) finish();
         }),
     );
 
-    const fontReady = document.fonts?.ready
-      ? Promise.race([document.fonts.ready, new Promise((resolve) => window.setTimeout(resolve, 1400))])
-      : Promise.resolve();
+    const fontTask = document.fonts?.ready
+      ? Promise.race([document.fonts.ready, new Promise((resolve) => window.setTimeout(resolve, 700))]).finally(advance)
+      : Promise.resolve().finally(advance);
 
-    const completeLoader = async () => {
-      await Promise.all([...preload, fontReady]);
+    const finish = async () => {
+      await Promise.allSettled([...imageTasks, fontTask]);
       const elapsed = performance.now() - startedAt;
-      const remaining = Math.max(0, (reducedMotion ? 100 : MINIMUM_LOADER_TIME) - elapsed);
-      await new Promise((resolve) => window.setTimeout(resolve, remaining));
+      const wait = Math.max(0, (reducedMotion ? 80 : MINIMUM_LOADER_TIME) - elapsed);
+      await new Promise((resolve) => window.setTimeout(resolve, wait));
       if (!cancelled) {
         setProgress(100);
-        window.setTimeout(() => !cancelled && setLoading(false), reducedMotion ? 0 : 300);
+        window.setTimeout(() => !cancelled && setLoading(false), reducedMotion ? 0 : 140);
       }
     };
 
-    completeLoader();
+    finish();
     const safetyTimer = window.setTimeout(() => {
       if (!cancelled) {
         setProgress(100);
         setLoading(false);
       }
-    }, reducedMotion ? 600 : MAXIMUM_LOADER_TIME);
+    }, reducedMotion ? 400 : MAXIMUM_LOADER_TIME);
 
     return () => {
       cancelled = true;

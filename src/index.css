@@ -373,3 +373,37 @@ body[data-ready="false"] {
     animation: none !important;
   }
 }
+
+/* Short premium loader */
+.loader-premium-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(72vw, 720px);
+  height: min(72vw, 720px);
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(185, 255, 44, 0.13), rgba(185, 255, 44, 0.035) 34%, transparent 68%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.loader-mark-wrap {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34), inset 0 0 0 1px rgba(185, 255, 44, 0.04);
+  backdrop-filter: blur(18px);
+}
+
+@media (max-width: 639px) {
+  .loader-mark-wrap {
+    width: 78px;
+    height: 78px;
+  }
+}
